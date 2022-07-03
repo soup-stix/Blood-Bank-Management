@@ -1,0 +1,682 @@
+####################################tkinter_frontend###############################################################################################
+
+import tkinter as tk
+from PIL import Image, ImageTk
+
+import pyodbc 
+con = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=Anand-ROGZEPHYRUSG14;Service Name=orcl;User ID=scott;Password=anand')
+cursor = con.cursor()
+
+root = tk.Tk()
+
+root.iconbitmap('blood.ico')
+
+root.geometry("700x500")
+root.resizable(False,False)
+
+
+
+#variables
+patient_id = tk.IntVar()
+patient_id.set("")
+pat_req = tk.IntVar()
+pat_req.set("")
+donor_id = tk.IntVar()
+donor_id.set("")
+hospital_id = tk.IntVar()
+hospital_id.set("")
+hos_pass = tk.StringVar()
+hos_pass.set("")
+blood_bank_id = tk.IntVar()
+blood_bank_id.set("")
+blood_pass = tk.StringVar()
+blood_pass.set("")
+name_pat = tk.StringVar()
+name_pat.set("")
+contact_pat = tk.IntVar()
+contact_pat.set("")
+bg_type = tk.StringVar()
+bg_type.set("")
+donor_id = tk.IntVar()
+donor_id.set("")
+donor_age = tk.IntVar()
+donor_age.set("")
+donor_city = tk.StringVar()
+donor_city.set("")
+
+
+
+
+
+#Functions
+def main():
+
+    #canvas
+    canvas = tk.Canvas(root, width=600, height = 300)
+    canvas.grid(columnspan=3, rowspan=3)
+
+    title = root.title("BLOOD BANK DATABASE")
+
+    #background image
+    logo = Image.open('image.png')
+    logo = ImageTk.PhotoImage(logo)
+    logo_label = tk.Label(image=logo)
+    logo_label.image = logo
+    logo_label.grid(column=1, row=0)
+
+    canvas = tk.Canvas(width=400,height=375, bg="#def5ff")
+    canvas.place(x=150,y=60)
+    
+
+    #title
+    title = tk.Label(text="WELCOME!", bg="#def5ff", font="Bold 30", fg="#20bebe")
+    title.place(x=250,y=80)
+
+
+    #Buttons
+    hosp_but = tk.Button(root, text = "HOSPITAL", bg="#def5ff", font = "BOLD 20",command= hospital_login).place(x=275,y=200)
+    donor_but = tk.Button(root, text = "BLOOD BANK", bg="#def5ff", font = "BOLD 20",command= donor_login).place(x=255,y=300)
+    
+def pat_page():
+    pat_det = tk.Frame(root, width = 600 , height = 700).place(x=0,y=0)
+
+    #background image
+    logo = Image.open('image.png')
+    logo = ImageTk.PhotoImage(logo)
+    logo_label = tk.Label(pat_det,image=logo)
+    logo_label.image = logo
+    logo_label.grid(column=0, row=0)
+     
+    #canvas
+    canvas = tk.Canvas(pat_det,width=400,height=375, bg="#def5ff")
+    canvas.place(x=150,y=60)
+
+    
+
+    #title = hosp.title("PRANATHI HOSPITAL LOGIN")
+
+    head = tk.Label(pat_det,text = "PATIENT", font = "BOLD 30", bg = "#def5ff" , fg="#8193de")
+    head.place(x=275,y=80)
+
+    reg_but = tk.Button(pat_det, text = "REGISTER NEW PATIENT", bg="#def5ff", font = "BOLD 15",command= pat_register_page)
+    reg_but.place(x=225,y=175)
+    dem_but = tk.Button(pat_det, text = "DEMAND BLOOD", bg="#def5ff", font = "BOLD 15",command= demand_blood)
+    dem_but.place(x=270,y=235)
+    cancel_but = tk.Button(pat_det, text = "CANCEL", font = "BOLD 15",command=hospital_login , bg="#def5ff")
+    cancel_but.place(x=310,y=295)
+
+def hospital_login():
+
+    def hospital_login_check():
+        con = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=Anand-ROGZEPHYRUSG14;Service Name=orcl;User ID=scott;Password=anand')
+        cursor = con.cursor()
+        id = hospital_id.get()
+        pwd = hos_pass.get()
+        print(pwd)
+
+        #print(id,pwd)
+
+        cursor.execute("select password from hospital where hospital_id = %s"%(id))
+        c = cursor.fetchone()
+        print(c[0])
+        if c[0] == pwd:
+            pat_page()
+        else: 
+            error = tk.Label(hosp, text="TRY AGAIN!!", font="BOLD 12",bg="#def5ff", fg = "#d91e1e")
+            error.place(x=350 , y=250)
+
+    def clear():
+        #id_ent.delete(0,tk.END)
+        pwd_ent.delete(0,tk.END)
+
+
+    #hosp = tk.Toplevel()
+    hosp = tk.Frame(root, width = 600 , height = 700).place(x=0,y=0)
+
+    #background image
+    logo = Image.open('image.png')
+    logo = ImageTk.PhotoImage(logo)
+    logo_label = tk.Label(hosp,image=logo)
+    logo_label.image = logo
+    logo_label.grid(column=0, row=0)
+     
+    #canvas
+    canvas = tk.Canvas(hosp,width=400,height=375, bg="#def5ff")
+    canvas.place(x=150,y=60)
+
+  
+    #title = hosp.title("PRANATHI HOSPITAL LOGIN")
+
+    head = tk.Label(hosp,text = "HOSPITAL LOGIN", font = "BOLD 30", bg = "#def5ff" , fg="#8193de")
+    head.place(x=180,y=80)
+
+    id = tk.Label(hosp, text="Hostipal ID:", font = "BOLD 12",bg="#def5ff")
+    id.place(x=250,y=150)
+    id_ent = tk.Entry(hosp,textvariable = hospital_id, font = "10" , width = 10)
+    id_ent.place(x=350,y=150)
+
+    pwd = tk.Label(hosp, text="Password:", font = "BOLD 12",bg="#def5ff")
+    pwd.place(x=250,y=200)
+    pwd_ent = tk.Entry(hosp,textvariable = hos_pass, width = 10, font = "10", show = "#")
+    pwd_ent.place(x=350,y=200)
+
+    log_but = tk.Button(hosp, text = "LOGIN", font = "BOLD 15", bg="#def5ff", command = lambda:[hospital_login_check(),clear()])#pat_page
+    log_but.place(x=275,y=300)
+    cancel_but = tk.Button(hosp, text = "CANCEL", font = "BOLD 15",command= main , bg="#def5ff")
+    cancel_but.place(x=375,y=300)
+
+def donor_login():
+    def donor_login_check():
+        id = blood_bank_id.get()
+        pwd = blood_pass.get()
+
+        print(id,pwd)
+        cursor.execute("select password from blood_bank where blood_bank_id = %s"%(id))
+        c = cursor.fetchone()
+        print(c[0])
+
+        if pwd == c[0]:
+            donor_page()
+            print("works")
+        else: 
+            error = tk.Label(donor, text="TRY AGAIN!!", font="BOLD 12",bg="#def5ff", fg = "#d91e1e")
+            error.place(x=350 , y=250)
+
+    def clear():
+        #id_ent.delete(0,tk.END)
+        pwd_ent.delete(0,tk.END)
+
+
+    donor = tk.Frame(root, width = 600 , height = 700).place(x=0,y=0)
+
+    #background image
+    logo = Image.open('image.png')
+    logo = ImageTk.PhotoImage(logo)
+    logo_label = tk.Label(donor,image=logo)
+    logo_label.image = logo
+    logo_label.grid(column=0, row=0)
+     
+    #canvas
+    canvas = tk.Canvas(donor,width=400,height=375, bg="#def5ff")
+    canvas.place(x=150,y=60)
+
+   
+
+    #title = donor.title("PRANATHI DONOR LOGIN")
+
+    head = tk.Label(donor,text = "BLOOD BANK LOGIN", font = "BOLD 30", bg="#def5ff", fg="#f0608b")
+    head.place(x=150,y=80)
+
+    id = tk.Label(donor, text="Blood Bank ID:", font = "BOLD 12",bg="#def5ff")
+    id.place(x=225,y=150)
+    id_ent = tk.Entry(donor,textvariable = blood_bank_id, width = 10, font = "10")
+    id_ent.place(x=350,y=150)
+
+    pwd = tk.Label(donor, text="Password:", font = "BOLD 12",bg="#def5ff")
+    pwd.place(x=250,y=200)
+    pwd_ent = tk.Entry(donor,textvariable = blood_pass, width = 10, font = "10", show = "#")
+    pwd_ent.place(x=350,y=200)
+
+    log_but = tk.Button(donor, text = "LOGIN", font = "BOLD 15", bg="#def5ff" , command = lambda:[donor_login_check(),clear()])
+    log_but.place(x=275,y=300)
+    cancel_but = tk.Button(donor, text = "CANCEL", font = "BOLD 15",command=main, bg="#def5ff")
+    cancel_but.place(x=375,y=300)
+
+def demand_blood():
+
+    #def clear():
+        #id_ent.delete(0,tk.END)
+
+    def check_status():
+        id = patient_id.get()
+        req = pat_req.get()
+        print(id)
+        cursor.execute("select status from patient where patient_id = %s"%(id))
+        t = cursor.fetchone()
+        if t[0] == 0:
+            cursor.execute("select check_blood_stock(%s, %s) from dual"%(id,req))
+            c = cursor.fetchone()
+            print("status was 0")
+            #status_op.delete(0,tk.END)
+            if c[0] == "YES":
+                status_label = tk.Label(dem_blood, text="COMPLETED!!     ", font = "BOLD 12",bg="#def5ff",fg="#4eeb2f") 
+                status_label.place(x=310, y=250)
+                cursor.execute("update patient set status = 1 where patient_id = %s"%(id))
+                con.commit()
+            elif c[0] == "NO":
+                status_label = tk.Label(dem_blood, text="PENDING!!       ", font = "BOLD 12",bg="#def5ff",fg="#d91e1e") 
+                status_label.place(x=310, y=250)
+        else:
+            print("status was 1")
+            status_label = tk.Label(dem_blood, text="FULFILLED!!       ", font = "BOLD 12",bg="#def5ff",fg="#4eeb2f") 
+            status_label.place(x=310, y=250)
+
+        det_but = tk.Button(dem_blood, text = "VIEW PATIENT DETAILS", font = "BOLD 15",command=lambda:[view_patient(id)], bg="#def5ff")
+        det_but.place(x=245,y=350)
+
+    dem_blood = tk.Frame(root, width = 600 , height = 700).place(x=0,y=0)
+
+    #background image
+    logo = Image.open('image.png')
+    logo = ImageTk.PhotoImage(logo)
+    logo_label = tk.Label(dem_blood,image=logo)
+    logo_label.image = logo
+    logo_label.grid(column=0, row=0)
+     
+    #canvas
+    canvas = tk.Canvas(dem_blood,width=400,height=375, bg="#def5ff")
+    canvas.place(x=150,y=60)
+
+    head = tk.Label(dem_blood,text = "BLOOD", font = "BOLD 30", bg = "#def5ff" , fg="#8193de")
+    head.place(x=275,y=80)
+
+    id = tk.Label(dem_blood, text="Patient ID:", font = "BOLD 12",bg="#def5ff")
+    id.place(x=225,y=150)
+    id_ent = tk.Entry(dem_blood,textvariable = patient_id, width = 10, font = "10")
+    id_ent.place(x=350,y=150)
+
+    req = tk.Label(dem_blood, text="Requirement:", font = "BOLD 12",bg="#def5ff")
+    req.place(x=225,y=200)
+    req_ent = tk.Entry(dem_blood,textvariable = pat_req, width = 10, font = "10")
+    req_ent.place(x=350,y=200)
+
+
+    status = tk.Label(dem_blood, text="Status:", font = "BOLD 12",bg="#def5ff")
+    status.place(x=225,y=250)
+    #status_op = tk.Listbox(dem_blood, font = "10", width = 15, height =1)
+    #status_op.place(x=310, y=200)
+    
+
+    #cursor.execute("")
+    #c = cursor,fetchone()
+    """
+    if c == 1:
+        status_op.insert(tk.END,"COMPLETED")
+    else:
+        status_op.insert(tk.END,"PENDING")
+    """
+    check_but = tk.Button(dem_blood, text = "SUBMIT", font = "BOLD 15", bg="#def5ff", command = lambda:[check_status()])
+    check_but.place(x=275,y=300)
+    back_but = tk.Button(dem_blood, text = "BACK", font = "BOLD 15",command=pat_page, bg="#def5ff")
+    back_but.place(x=375,y=300)
+
+def pat_register_page():
+
+    def clear():
+        name_ent.delete(0,tk.END)
+        contact_ent.delete(0,tk.END)
+        #hosp_id_ent.delete(0,tk.END)
+        bg_ent.delete(0,tk.END)
+
+    def submit_details():
+        con = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=Anand-ROGZEPHYRUSG14;Service Name=orcl;User ID=scott;Password=anand')
+        cursor = con.cursor()
+
+        name = name_pat.get()
+        contact = contact_pat.get()
+        bg = bg_type.get()
+        hosp_id = hospital_id.get()
+
+        print(name,contact,bg,hosp_id)
+
+        cursor.execute("insert into Patient values(Patient_seq.nextval, '%s', '%s', %s,%s,0)"%(name,bg,contact,hosp_id))
+        con.commit()
+
+        error = tk.Label(pat_reg,text="SUBMITTED!!", bg= "#def5ff", fg = "#4eeb2f", font = "BOLD 20")
+        error.place(x=280,y=300)
+        
+        cursor.execute("select round(patient_id,0) from patient where contact = %s"%(contact))
+        c = cursor.fetchone()
+
+        new_id_tag = tk.Label(pat_reg, text="Patient ID:", font = "BOLD 15",bg="#def5ff")
+        new_id_tag.place(x=200,y=350)
+        new_id = tk.Label(pat_reg, text = c[0], font = "BOLD 15",bg="#def5ff")
+        new_id.place(x=350,y=350)
+
+        #submit_but.after(3000,pat_page)
+
+
+    pat_reg = tk.Frame(root, width = 600 , height = 700).place(x=0,y=0)
+
+    #background image
+    logo = Image.open('image.png')
+    logo = ImageTk.PhotoImage(logo)
+    logo_label = tk.Label(pat_reg,image=logo)
+    logo_label.image = logo
+    logo_label.grid(column=0, row=0)
+     
+    #canvas
+    canvas = tk.Canvas(pat_reg,width=500,height=480, bg="#def5ff")
+    canvas.place(x=100,y=10)
+
+   
+
+    #title = donor.title("PRANATHI DONOR LOGIN")
+
+    head = tk.Label(pat_reg,text = "New Patient Registration", font = "BOLD 30", bg="#def5ff", fg="#f0608b")
+    head.place(x=130,y=30)
+
+    name = tk.Label(pat_reg, text="Name:", font = "BOLD 15",bg="#def5ff")
+    name.place(x=200,y=100)
+    contact = tk.Label(pat_reg, text="Contact No.:", font = "BOLD 15",bg="#def5ff")
+    contact.place(x=200,y=150)
+    #hosp_id = tk.Label(pat_reg, text="Hospital ID:", font = "BOLD 15",bg="#def5ff")
+    #hosp_id.place(x=200,y=200)
+    bg = tk.Label(pat_reg, text="Blood Group:", font = "BOLD 15",bg="#def5ff")
+    bg.place(x=200,y=200)
+
+
+    name_ent = tk.Entry(pat_reg,textvariable = name_pat, width = 15, font = "10")
+    name_ent.place(x=350,y=100)
+    contact_ent = tk.Entry(pat_reg,textvariable = contact_pat, width = 15, font = "10")
+    contact_ent.place(x=350,y=150)
+    #hosp_id_ent = tk.Entry(pat_reg,textvariable = hospital_id, width = 15, font = "10")
+    #hosp_id_ent.place(x=350,y=200)
+    bg_ent = tk.Entry(pat_reg,textvariable = bg_type, width = 15, font = "10")
+    bg_ent.place(x=350,y=200)
+
+
+    submit_but = tk.Button(pat_reg, text = "SUBMIT", font = "BOLD 15", bg="#def5ff", command = lambda:[submit_details(),clear()])#pat_page
+    submit_but.place(x=275,y=400)
+    #submit_but.after(3000,pat_page)
+    back_but = tk.Button(pat_reg, text = "BACK", font = "BOLD 15",command= pat_page , bg="#def5ff")
+    back_but.place(x=375,y=400)
+
+def donor_page():
+    donor_det = tk.Frame(root, width = 600 , height = 700).place(x=0,y=0)
+
+    #background image
+    logo = Image.open('image.png')
+    logo = ImageTk.PhotoImage(logo)
+    logo_label = tk.Label(donor_det,image=logo)
+    logo_label.image = logo
+    logo_label.grid(column=0, row=0)
+     
+    #canvas
+    canvas = tk.Canvas(donor_det,width=400,height=375, bg="#def5ff")
+    canvas.place(x=150,y=60)
+
+    
+
+    #title = hosp.title("PRANATHI HOSPITAL LOGIN")
+
+    head = tk.Label(donor_det,text = "DONOR", font = "BOLD 30", bg = "#def5ff" , fg="#8193de")
+    head.place(x=275,y=80)
+
+    reg_but = tk.Button(donor_det, text = "REGISTER NEW DONOR", bg="#def5ff", font = "BOLD 15",command= donor_register_page)
+    reg_but.place(x=225,y=175)
+    dem_but = tk.Button(donor_det, text = "DONATE BLOOD", bg="#def5ff", font = "BOLD 15",command= donate_blood)
+    dem_but.place(x=270,y=235)
+    cancel_but = tk.Button(donor_det, text = "CANCEL", font = "BOLD 15",command=donor_login , bg="#def5ff")
+    cancel_but.place(x=310,y=295)
+
+def donate_blood():
+
+    def clear():
+        id_ent.delete(0,tk.END)
+
+
+    def check_status():
+        con = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=Anand-ROGZEPHYRUSG14;Service Name=orcl;User ID=scott;Password=anand')
+        cursor = con.cursor()
+        id = donor_id.get()
+        print(id)
+        cursor.execute("select eligibility_check(%s) from dual"%(id))
+        c = cursor.fetchone()
+        print(c[0])
+        #status_op.delete(0,tk.END)
+        if c[0] == "YES":
+            status_label = tk.Label(don_blood, text="COMPLETED!!        ", font = "BOLD 12",bg="#def5ff",fg="#4eeb2f") 
+            status_label.place(x=310, y=200)
+            cursor.execute("update donor set last_date_donated = '01-jan-0001' where donor_id = %s"%(id))
+            con.commit()
+            cursor.execute("select last_date_donated from donor where donor_id = %s"%(id))
+            d = cursor.fetchone()
+            print(d[0])
+            justi_label = tk.Label(don_blood, text="LAST DONATED ON:", font = "BOLD 12",bg="#def5ff",fg="#4eeb2f") 
+            justi_label.place(x=310, y=225)
+            reason_label = tk.Label(don_blood, text=d[0], font = "BOLD 12",bg="#def5ff",fg="#4eeb2f") 
+            reason_label.place(x=310, y=250)
+        elif c[0] == "NO":
+            cursor.execute("select last_date_donated from donor where donor_id = %s"%(id))
+            d = cursor.fetchone()
+            print(d[0])
+            status_label = tk.Label(don_blood, text="NOT ELIGIBLE!!", font = "BOLD 12",bg="#def5ff",fg="#d91e1e") 
+            status_label.place(x=310, y=200)
+            justi_label = tk.Label(don_blood, text="LAST DONATED ON:", font = "BOLD 12",bg="#def5ff",fg="#d91e1e") 
+            justi_label.place(x=310, y=225)
+            reason_label = tk.Label(don_blood, text=d[0], font = "BOLD 12",bg="#def5ff",fg="#d91e1e") 
+            reason_label.place(x=310, y=250)
+            det_but = tk.Button(don_blood, text = "VIEW DONOR DETAILS", font = "BOLD 15",command=lambda:[view_donor(id)], bg="#def5ff")
+            det_but.place(x=250,y=350)
+
+        
+
+    don_blood = tk.Frame(root, width = 600 , height = 700).place(x=0,y=0)
+
+    #background image
+    logo = Image.open('image.png')
+    logo = ImageTk.PhotoImage(logo)
+    logo_label = tk.Label(don_blood,image=logo)
+    logo_label.image = logo
+    logo_label.grid(column=0, row=0)
+     
+    #canvas
+    canvas = tk.Canvas(don_blood,width=400,height=375, bg="#def5ff")
+    canvas.place(x=150,y=60)
+
+    head = tk.Label(don_blood,text = "DONATE AGAIN!!", font = "BOLD 30", bg = "#def5ff" , fg="#8193de")
+    head.place(x=190,y=80)
+
+    id = tk.Label(don_blood, text="Donor ID:", font = "BOLD 12",bg="#def5ff")
+    id.place(x=225,y=150)
+    id_ent = tk.Entry(don_blood,textvariable = donor_id, width = 10, font = "10")
+    id_ent.place(x=350,y=150)
+
+
+    status = tk.Label(don_blood, text="Status:", font = "BOLD 12",bg="#def5ff")
+    status.place(x=225,y=200)
+    #status_op = tk.Listbox(dem_blood, font = "10", width = 15, height =1)
+    #status_op.place(x=310, y=200)
+    
+
+    #cursor.execute("")
+    #c = cursor,fetchone()
+    """
+    if c == 1:
+        status_op.insert(tk.END,"COMPLETED")
+    else:
+        status_op.insert(tk.END,"PENDING")
+    """
+    check_but = tk.Button(don_blood, text = "SUBMIT", font = "BOLD 15", bg="#def5ff", command = lambda:[check_status(),clear()])
+    check_but.place(x=275,y=300)
+    back_but = tk.Button(don_blood, text = "BACK", font = "BOLD 15",command=lambda:[donor_page(),clear()], bg="#def5ff")
+    back_but.place(x=375,y=300)
+
+def donor_register_page():
+
+    def clear():
+        name_ent.delete(0,tk.END)
+        contact_ent.delete(0,tk.END)
+        #hosp_id_ent.delete(0,tk.END)
+        bg_ent.delete(0,tk.END)
+        age_ent.delete(0,tk.END)
+        city_ent.delete(0,tk.END)
+
+    def submit_details():
+        con = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=Anand-ROGZEPHYRUSG14;Service Name=orcl;User ID=scott;Password=anand')
+        cursor = con.cursor()
+
+        name = name_pat.get()
+        contact = contact_pat.get()
+        bg = bg_type.get()
+        bb_id = blood_bank_id.get()
+        age = donor_age.get()
+        city = donor_city.get()
+
+        print(name,contact,bg,bb_id,age,city)
+        if age>=18:
+            ############################HELPPPPPPP########################################################################
+            cursor.execute("insert into Donor values(donor_seq.nextval, '%s', '%s', '%s', %s, %s, %s, '01-jan-0001')"%(name,bg,city,contact,bb_id,age))
+            con.commit()
+            cursor.execute("select round(donor_id,0) from donor where contact = %s"%(contact))
+            c = cursor.fetchone()
+
+            new_id_tag = tk.Label(donor_reg, text="Donor ID:", font = "BOLD 15",bg="#def5ff")
+            new_id_tag.place(x=200,y=350)
+            new_id = tk.Label(donor_reg, text = c[0], font = "BOLD 15",bg="#def5ff")
+            new_id.place(x=350,y=350)
+
+            error = tk.Label(donor_reg,text="SUBMITTED!!", bg= "#def5ff", fg = "#4eeb2f", font = "BOLD 20")
+            error.place(x=280,y=450)
+
+        else:
+            error = tk.Label(donor_reg,text="UNDERAGE!!  ", bg= "#def5ff", fg = "#d91e1e", font = "BOLD 20")
+            error.place(x=280,y=450)
+
+        #submit_but.after(3000,pat_page)
+
+
+    donor_reg = tk.Frame(root, width = 600 , height = 700).place(x=0,y=0)
+
+    #background image
+    logo = Image.open('image.png')
+    logo = ImageTk.PhotoImage(logo)
+    logo_label = tk.Label(donor_reg,image=logo)
+    logo_label.image = logo
+    logo_label.grid(column=0, row=0)
+     
+    #canvas
+    canvas = tk.Canvas(donor_reg,width=500,height=480, bg="#def5ff")
+    canvas.place(x=100,y=10)
+
+   
+
+    #title = donor.title("PRANATHI DONOR LOGIN")
+
+    head = tk.Label(donor_reg,text = "New Donor Registration", font = "BOLD 30", bg="#def5ff", fg="#f0608b")
+    head.place(x=130,y=30)
+
+    name = tk.Label(donor_reg, text="Name:", font = "BOLD 15",bg="#def5ff")
+    name.place(x=200,y=100)
+    contact = tk.Label(donor_reg, text="Contact No.:", font = "BOLD 15",bg="#def5ff")
+    contact.place(x=200,y=150)
+    #hosp_id = tk.Label(pat_reg, text="Hospital ID:", font = "BOLD 15",bg="#def5ff")
+    #hosp_id.place(x=200,y=200)
+    bg = tk.Label(donor_reg, text="Blood Group:", font = "BOLD 15",bg="#def5ff")
+    bg.place(x=200,y=200)
+    age = tk.Label(donor_reg, text="Age:", font = "BOLD 15",bg="#def5ff")
+    age.place(x=200,y=250)
+    city = tk.Label(donor_reg, text="City:", font = "BOLD 15",bg="#def5ff")
+    city.place(x=200,y=300)
+
+
+    name_ent = tk.Entry(donor_reg,textvariable = name_pat, width = 15, font = "10")
+    name_ent.place(x=350,y=100)
+    contact_ent = tk.Entry(donor_reg,textvariable = contact_pat, width = 15, font = "10")
+    contact_ent.place(x=350,y=150)
+    #hosp_id_ent = tk.Entry(pat_reg,textvariable = hospital_id, width = 15, font = "10")
+    #hosp_id_ent.place(x=350,y=200)
+    bg_ent = tk.Entry(donor_reg,textvariable = bg_type, width = 15, font = "10")
+    bg_ent.place(x=350,y=200)
+    age_ent = tk.Entry(donor_reg,textvariable = donor_age, width = 15, font = "10")
+    age_ent.place(x=350,y=250)
+    city_ent = tk.Entry(donor_reg,textvariable = donor_city, width = 15, font = "10")
+    city_ent.place(x=350,y=300)
+
+
+    submit_but = tk.Button(donor_reg, text = "SUBMIT", font = "BOLD 15", bg="#def5ff", command = lambda:[submit_details(),clear()])#pat_page
+    submit_but.place(x=275,y=400)
+    #submit_but.after(3000,pat_page)
+    back_but = tk.Button(donor_reg, text = "BACK", font = "BOLD 15",command= donor_page , bg="#def5ff")
+    back_but.place(x=375,y=400)
+
+def view_donor(id):
+    con = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=Anand-ROGZEPHYRUSG14;Service Name=orcl;User ID=scott;Password=anand')
+    cursor = con.cursor()
+    cursor.execute("select name,blood_group,contact,city,age from donor where donor_id = %s"%(id))
+    c = cursor.fetchone()
+    print(c)
+    don_det = tk.Frame(root, width = 600 , height = 700).place(x=0,y=0)
+
+    #background image
+    logo = Image.open('image.png')
+    logo = ImageTk.PhotoImage(logo)
+    logo_label = tk.Label(don_det,image=logo)
+    logo_label.image = logo
+    logo_label.grid(column=0, row=0)
+     
+    #canvas
+    canvas = tk.Canvas(don_det,width=400,height=375, bg="#def5ff")
+    canvas.place(x=150,y=60)
+
+    head = tk.Label(don_det,text = "DONAR DETAILS", font = "BOLD 30", bg = "#def5ff" , fg="#8193de")
+    head.place(x=190,y=80)
+
+    name = tk.Label(don_det, text="Name:", font = "BOLD 12",bg="#def5ff")
+    name.place(x=225,y=150)
+    name_val = tk.Label(don_det, text=c[0], font = "BOLD 12",bg="#def5ff")
+    name_val.place(x=275,y=150)
+    bg = tk.Label(don_det, text="Blood Group:", font = "BOLD 12",bg="#def5ff")
+    bg.place(x=225,y=200)
+    bg_val = tk.Label(don_det, text=c[1], font = "BOLD 12",bg="#def5ff")
+    bg_val.place(x=325,y=200)
+    con = tk.Label(don_det, text="Contact:", font = "BOLD 12",bg="#def5ff")
+    con.place(x=225,y=250)
+    con_val = tk.Label(don_det, text=c[2], font = "BOLD 12",bg="#def5ff")
+    con_val.place(x=300,y=250)
+    city = tk.Label(don_det, text="City:", font = "BOLD 12",bg="#def5ff")
+    city.place(x=225,y=300)
+    city_val = tk.Label(don_det, text=c[3], font = "BOLD 12",bg="#def5ff")
+    city_val.place(x=300,y=300)
+    age = tk.Label(don_det, text="Age:", font = "BOLD 12",bg="#def5ff")
+    age.place(x=225,y=350)
+    age_val = tk.Label(don_det, text=c[4], font = "BOLD 12",bg="#def5ff")
+    age_val.place(x=300,y=345)
+    
+    
+   
+    back_but = tk.Button(don_det, text = "BACK", font = "BOLD 15",command=lambda:[donate_blood], bg="#def5ff")
+    back_but.place(x=325,y=400)
+
+def view_patient(id):
+    con = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=Anand-ROGZEPHYRUSG14;Service Name=orcl;User ID=scott;Password=anand')
+    cursor = con.cursor()
+    cursor.execute("select name,blood_group,contact from patient where patient_id = %s"%(id))
+    c = cursor.fetchone()
+    print(c)
+    don_det = tk.Frame(root, width = 600 , height = 700).place(x=0,y=0)
+
+    #background image
+    logo = Image.open('image.png')
+    logo = ImageTk.PhotoImage(logo)
+    logo_label = tk.Label(don_det,image=logo)
+    logo_label.image = logo
+    logo_label.grid(column=0, row=0)
+     
+    #canvas
+    canvas = tk.Canvas(don_det,width=400,height=375, bg="#def5ff")
+    canvas.place(x=150,y=60)
+
+    head = tk.Label(don_det,text = "PATIENT DETAILS", font = "BOLD 30", bg = "#def5ff" , fg="#8193de")
+    head.place(x=185,y=80)
+
+    name = tk.Label(don_det, text="Name:", font = "BOLD 12",bg="#def5ff")
+    name.place(x=225,y=150)
+    name_val = tk.Label(don_det, text=c[0], font = "BOLD 12",bg="#def5ff")
+    name_val.place(x=275,y=150)
+    bg = tk.Label(don_det, text="Blood Group:", font = "BOLD 12",bg="#def5ff")
+    bg.place(x=225,y=200)
+    bg_val = tk.Label(don_det, text=c[1], font = "BOLD 12",bg="#def5ff")
+    bg_val.place(x=325,y=200)
+    con = tk.Label(don_det, text="Contact:", font = "BOLD 12",bg="#def5ff")
+    con.place(x=225,y=250)
+    con_val = tk.Label(don_det, text=c[2], font = "BOLD 12",bg="#def5ff")
+    con_val.place(x=300,y=250)
+    
+    back_but = tk.Button(don_det, text = "BACK", font = "BOLD 15",command=lambda:[demand_blood()], bg="#def5ff")
+    back_but.place(x=325,y=300)
+
+main()
+root.mainloop()
+

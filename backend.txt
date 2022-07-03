@@ -1,0 +1,580 @@
+######################################################################table creation and population###################################################################################################################################
+create table Blood_Bank                   --populated, 1 record
+( Blood_Bank_ID number not null primary key,
+Name varchar2(30) not null,
+Address varchar2(100) unique,
+Manager varchar2(30),
+Contact number unique
+Password varchar2(30));
+
+insert into Blood_Bank values(20050, 'SSN Blood Bank', 'Mount Road, Chennai', 'Ram', 9821345367, '123Pran*');
+
+create table Hospital			--populated, 3 records
+(Hospital_ID number not null primary key,
+Name varchar2(30) not null,
+Address varchar2(100) unique,
+Contact number unique,
+Password varchar2(30) unique);
+
+create sequence hosp_seq
+start with 8001
+increment by 1
+minvalue 8001
+nomaxvalue;
+
+insert into Hospital values(hosp_seq.nextval, 'Apollo Hospital', 'Greams Road, Chennai', 9876216678, 'Apollo1*');
+insert into Hospital values(hosp_seq.nextval, 'Spandana Hospital', 'Mugappair, Chennai', 9668762178, 'Venkat23!');
+insert into Hospital values(hosp_seq.nextval, 'Child Trust Hospital', 'Nungambakkam, Chennai', 9621768768, 'kanchiKamakoti');
+
+create table Donor			--populated, 12 records
+( Donor_ID number not null primary key,
+Name varchar2(30) not null,
+Blood_Group varchar2(5) not null,
+City varchar2(50),
+Contact number unique,
+Blood_Bank_ID number not null,
+Age number,
+last_date_donated date,
+foreign key (Blood_Bank_ID) references Blood_Bank(Blood_Bank_ID));
+
+create sequence donor_seq
+start with 1001
+increment by 1
+minvalue 1001
+nomaxvalue;
+
+insert into Donor values(donor_seq.nextval, 'Namjoon', 'A+', 'Chennai', 9346675221, 20050, 26, '16-Sep-2021');
+insert into Donor values(donor_seq.nextval, 'Seokjin', 'B+', 'Chennai', 9466752213, 20050, 29, '13-Jun-2021');
+insert into Donor values(donor_seq.nextval, 'Nancy', 'AB+', 'Chennai', 9667522134, 20050, 22, '14-Mar-2021');
+insert into Donor values(donor_seq.nextval, 'Yeonjun', 'A-', 'Chennai', 9675221346, 20050, 26, '28-Nov-2021');
+insert into Donor values(donor_seq.nextval, 'Chaeyoung', 'A-', 'Chennai', 9752213466, 20050, 21, '4-Oct-2021');
+insert into Donor values(donor_seq.nextval, 'Hooyeon', 'B+', 'Chennai', 9522134667, 20050, 24, '5-Feb-2021');
+insert into Donor values(donor_seq.nextval, 'Shinhye', 'O+', 'Chennai', 9221346675, 20050, 32, '20-Apr-2021');
+insert into Donor values(donor_seq.nextval, 'Taehyun', 'O+', 'Chennai', 9672199345, 20050, 42, '30-Jun-2021');
+insert into Donor values(donor_seq.nextval, 'Ryujin', 'O-', 'Chennai', 9219934567, 20050, 37, '01-July-2021');
+insert into Donor values(donor_seq.nextval, 'Yeji', 'AB-', 'Chennai', 9199345672, 20050, 35, '06-Aug-2021');
+insert into Donor values(donor_seq.nextval, 'Seeun', 'A+', 'Chennai', 9456199372, 20050, 27, '10-Feb-2021');
+insert into Donor values(donor_seq.nextval, 'Yoongi', 'B-', 'Chennai', 9945937612, 20050, 27, '15-Oct-2021');
+
+
+create table Patient       --populated 9 records
+(Patient_ID number not null primary key,
+Name varchar2(30) not null,
+Blood_Group varchar2(5) not null,
+Contact number unique,
+Hospital_ID number not null,
+foreign key (Hospital_ID) references Hospital(Hospital_ID)
+status number);
+
+alter table patient modify status default 0;
+
+create sequence Patient_seq
+start with 3001
+increment by 1
+minvalue 3001
+nomaxvalue;
+
+insert into Patient values(Patient_seq.nextval, 'Hoseok', 'B+', 9812345001, 8003, 0);
+insert into Patient values(Patient_seq.nextval, 'Yuna', 'B-', 9008451231, 8002, 0);
+insert into Patient values(Patient_seq.nextval, 'Taehyung', 'AB+', 9023450811, 8001, 0);
+insert into Patient values(Patient_seq.nextval, 'Lia', 'O+', 9500231148, 8003, 0);
+insert into Patient values(Patient_seq.nextval, 'Jisoo', 'AB+', 9450023811, 8001, 0);
+insert into Patient values(Patient_seq.nextval, 'Jihyo', 'O-', 9813450102, 8001, 0);
+insert into Patient values(Patient_seq.nextval, 'Saebyeok', 'AB-', 9028345011, 8003, 0);
+insert into Patient values(Patient_seq.nextval, 'Gihun', 'O+', 9340125081, 8002, 0);
+insert into Patient values(Patient_seq.nextval, 'Jimin', 'O-', 9715040181, 8001, 0);
+insert into Patient values(Patient_seq.nextval, 'Jungkook', 'AB-', 9408017151, 8001, 0);
+
+create table Stock
+(S_ID number not null primary key,
+Blood_Bank_ID number,
+A_Pos number,
+A_Neg number,
+B_Pos number,
+B_Neg number,
+O_Pos number,
+O_Neg number,
+AB_Pos number,
+AB_Neg number);
+
+create sequence stock_seq
+start with 4001
+increment by 1
+minvalue 4001
+nomaxvalue;
+
+insert into Stock values(stock_seq.nextval,  20050, 12, 14, 13, 20, 23, 2, 16, 14);
+
+
+###########################################################################################################
+AGE TRIGGER FOR CHECKING IF DONOR IS A MINOR
+create or replace trigger age_trig
+before insert on donor
+for each row
+begin 
+if (:new.age<18) then
+raise_application_error(-20500, 'A minor cannot be a donor');
+end if;
+end;
+##########################################################################################################
+TRIGGER TO SET DATE OF NEW DONOR AS SYSDATE
+create or replace trigger donor_date 
+before insert or update on donor
+for each row
+begin
+if :new.last_date_donated = '01-jan-0001' then
+:new.last_date_donated := sysdate;
+end if;
+end;
+###########################################################################################################
+TRIGGER FOR UPDATING STOCK AS AND WHEN DONORS ARE INSERTED
+create or replace trigger stock_trig
+before insert or update on donor
+for each row
+begin
+if(:new.blood_group='A+' and :new.blood_bank_ID=20050) then
+update stock set A_Pos= A_Pos+1 where blood_bank_ID=20050;
+elsif (:new.blood_group='A-' and :new.blood_bank_ID=20050) then
+update stock set A_Neg= A_Neg+1 where blood_bank_ID=20050;
+elsif (:new.blood_group='B+' and :new.blood_bank_ID=20050) then
+update stock set B_pos= B_pos+1 where blood_bank_ID=20050;
+elsif (:new.blood_group='B-' and :new.blood_bank_ID=20050) then
+update stock set B_Neg= B_Neg+1 where blood_bank_ID=20050;
+elsif (:new.blood_group='O+' and :new.blood_bank_ID=20050) then
+update stock set O_Pos= O_Pos+1 where blood_bank_ID=20050;
+elsif (:new.blood_group='O-' and :new.blood_bank_ID=20050) then
+update stock set O_Neg= O_Neg+1 where blood_bank_ID=20050;
+elsif (:new.blood_group='AB+' and :new.blood_bank_ID=20050) then
+update stock set AB_Pos= AB_Pos+1 where blood_bank_ID=20050;
+elsif (:new.blood_group='AB-' and :new.blood_bank_ID=20050) then
+update stock set AB_Neg= AB_Neg+1 where blood_bank_ID=20050;
+else
+dbms_output.put_line('Invalid');
+end if;
+end;
+################################################################################################################
+FUNCTION TO CHECK BLOOD STOCK PRESENCE IN BLOOD BANK
+create or replace function check_blood_stock(patid in number, need in number)
+return varchar2 is
+total number;
+ret varchar2(5);
+bg varchar2(5);
+flag number:=0;
+req number:= need;
+id number:= patid;
+a_neg number;
+a_pos number;
+b_pos number;
+b_neg number;
+ab_pos number;
+ab_neg number;
+o_pos number;
+o_neg number;
+begin
+select blood_group into bg from Patient where Patient_Id=id;
+select A_Pos into a_pos from stock where blood_bank_id=20050;
+select A_Neg into a_neg from stock where blood_bank_id=20050;
+select B_Pos into b_pos from stock where blood_bank_id=20050;
+select B_neg into b_neg from stock where blood_bank_id=20050;
+select O_Pos into o_pos from stock where blood_bank_id=20050;
+select O_Neg into o_neg from stock where blood_bank_id=20050;
+select AB_Pos into ab_pos from stock where blood_bank_id=20050;
+select AB_Neg into ab_neg from stock where blood_bank_id=20050;
+if bg = 'O+' then 
+total := o_pos+o_neg;
+if req<total then 
+ret:='YES';
+return ret;
+else 
+ret:='NO';
+return ret;
+end if;
+elsif bg = 'O-' then 
+total := o_neg;
+if req<total then 
+ret:='YES';
+return ret;
+else 
+ret:='NO';
+return ret;
+end if;
+elsif bg = 'A+' then 
+total := a_pos+a_neg+o_pos+o_neg;
+if req<total then 
+ret:='YES';
+return ret;
+else 
+ret:='NO';
+return ret;
+end if;
+elsif bg = 'A-' then 
+total := a_neg+o_neg;
+if req<total then 
+ret:='YES';
+return ret;
+else 
+ret:='NO';
+return ret;
+end if;
+elsif bg = 'AB+' then 
+total := a_neg+a_pos+ab_pos+ab_neg+b_pos+b_neg+o_pos+o_neg;
+if req<total then 
+ret:='YES';
+return ret;
+else 
+ret:='NO';
+return ret;
+end if;
+elsif bg = 'AB-' then 
+total := a_neg+ab_neg+b_neg+o_neg;
+if req<total then 
+ret:='YES';
+return ret;
+else 
+ret:='NO';
+return ret;
+end if;
+elsif bg = 'B+' then 
+total := b_neg+b_pos+o_neg+o_pos;
+if req<total then 
+ret:='YES';
+return ret;
+else 
+ret:='NO';
+return ret;
+end if;
+elsif bg = 'B-' then 
+total := b_neg+o_neg;
+if req<total then 
+ret:='YES';
+return ret;
+else 
+ret:='NO';
+return ret;
+end if;
+end if;
+end;
+###################################################################################################################
+TRIGGER TO CHECK POSITIVITY OF THE STOCK
+create or replace trigger stock_trigger
+before insert or update on stock
+for each row
+begin 
+if :new.A_Pos<0 or :new.A_Neg<0 or :new.O_Pos<0 or :new.O_Neg<0 or :new.B_Pos<0 or :new.B_Neg<0 or :old.AB_Pos<0 or :new.AB_Neg<0 then
+raise_application_error(-20500, 'Stock cannot be negative, request cannot be serviced, try elsewhere. ');
+end if;
+end;
+#####################################################################################################################
+UPDATING STOCK ACCORDING TO REQUEST OF BLOOD ASKED
+create or replace procedure stock_update(patid in number, need in number) as
+bg varchar2(5);
+flag number:=0;
+req number:= need;
+id number:= patid;
+a_neg number;
+a_pos number;
+b_pos number;
+b_neg number;
+ab_pos number;
+ab_neg number;
+o_pos number;
+o_neg number;
+begin
+select blood_group into bg from Patient where Patient_Id=id;
+select A_Pos into a_pos from stock where blood_bank_id=20050;
+select A_Neg into a_neg from stock where blood_bank_id=20050;
+select B_Pos into b_pos from stock where blood_bank_id=20050;
+select B_neg into b_neg from stock where blood_bank_id=20050;
+select O_Pos into o_pos from stock where blood_bank_id=20050;
+select O_Neg into o_neg from stock where blood_bank_id=20050;
+select AB_Pos into ab_pos from stock where blood_bank_id=20050;
+select AB_Neg into ab_neg from stock where blood_bank_id=20050;
+--------------------------------------------------------------------O POSITIVE
+if bg = 'O+' then
+if (o_pos<req) then
+update stock set o_pos = 0;
+req:=req-o_pos;
+dbms_output.put_line('true1');
+elsif (o_pos>req) then
+dbms_output.put_line('true2');
+update stock set o_pos = o_pos - req;
+flag:=1;
+end if;
+if (o_neg<req) and flag = 0 then
+dbms_output.put_line('true3');
+update stock set o_neg = 0;
+req:=req - o_neg;
+elsif (o_neg>req) and flag = 0 then
+dbms_output.put_line('true4');
+update stock set o_neg = o_neg - req;
+flag:=1;
+end if;
+end if;
+------------------------------------------------------------------O NEGATIVE
+if bg = 'O-' then
+if (o_neg<req) then
+update stock set o_neg = 0;
+req:=req-o_neg;
+dbms_output.put_line('true3');
+elsif (o_neg>req) then
+dbms_output.put_line('true4');
+update stock set o_neg = o_neg - req;
+flag:=1;
+end if;
+end if;
+------------------------------------------------------------------A POSITIVE
+if bg = 'A+' then
+if (a_pos<req) then
+update stock set a_pos = 0;
+req:=req-a_pos;
+dbms_output.put_line('true5');
+elsif (a_pos>req) then
+dbms_output.put_line('true6');
+update stock set a_pos = a_pos - req;
+flag:=1;
+end if;
+if (a_neg<req) and flag = 0 then
+dbms_output.put_line('true7');
+update stock set a_neg = 0;
+req:=req - a_neg;
+elsif (a_neg>req) and flag = 0 then
+dbms_output.put_line('true8');
+update stock set a_neg = a_neg - req;
+flag:=1;
+end if;
+if (o_neg<req) and flag = 0 then
+dbms_output.put_line('true3');
+update stock set o_neg = 0;
+req:=req - o_neg;
+elsif (o_neg>req) and flag = 0 then
+dbms_output.put_line('true4');
+update stock set o_neg = o_neg - req;
+flag:=1;
+end if;
+if (o_pos<req) and flag = 0 then
+dbms_output.put_line('true1');
+update stock set o_pos = 0;
+req:=req - o_pos;
+elsif (o_pos>req) and flag = 0 then
+dbms_output.put_line('true2');
+update stock set o_pos = o_pos - req;
+flag:=1;
+end if;
+end if;
+-------------------------------------------------------------------------A Negative
+if bg = 'A-' then
+if (a_neg<req) then
+update stock set a_neg = 0;
+req:=req-a_neg;
+dbms_output.put_line('true7');
+elsif (a_neg>req) then
+dbms_output.put_line('true8');
+update stock set a_neg = a_neg - req;
+flag:=1;
+end if;
+if (o_neg<req) and flag = 0 then
+dbms_output.put_line('true3');
+update stock set o_neg = 0;
+req:=req - o_neg;
+elsif (o_neg>req) and flag = 0 then
+dbms_output.put_line('true4');
+update stock set o_neg = o_neg - req;
+flag:=1;
+end if;
+end if;
+-------------------------------------------------------------------------B POSITIVE
+if bg = 'B+' then
+if (b_pos<req) then
+update stock set b_pos = 0;
+req:=req-b_pos;
+dbms_output.put_line('true9');
+elsif (b_pos>req) then
+dbms_output.put_line('true10');
+update stock set b_pos = b_pos - req;
+flag:=1;
+end if;
+if (b_neg<req) and flag = 0 then
+dbms_output.put_line('true11');
+update stock set b_neg = 0;
+req:=req - b_neg;
+elsif (b_neg>req) and flag = 0 then
+dbms_output.put_line('true12');
+update stock set b_neg = b_neg - req;
+flag:=1;
+end if;
+if (o_neg<req) and flag = 0 then
+dbms_output.put_line('true3');
+update stock set o_neg = 0;
+req:=req - o_neg;
+elsif (o_neg>req) and flag = 0 then
+dbms_output.put_line('true4');
+update stock set o_neg = o_neg - req;
+flag:=1;
+end if;
+if (o_pos<req) and flag = 0 then
+dbms_output.put_line('true1');
+update stock set o_pos = 0;
+req:=req - o_pos;
+elsif (o_pos>req) and flag = 0 then
+dbms_output.put_line('true2');
+update stock set o_pos = o_pos - req;
+flag:=1;
+end if;
+end if;
+----------------------------------------------------------------------------B NEGATIVE
+if bg = 'B-' then
+if (b_neg<req) then
+update stock set b_neg = 0;
+req:=req-b_neg;
+dbms_output.put_line('true11');
+elsif (b_neg>req) then
+dbms_output.put_line('true12');
+update stock set b_neg = b_neg - req;
+flag:=1;
+end if;
+if (o_neg<req) and flag = 0 then
+dbms_output.put_line('true3');
+update stock set o_neg = 0;
+req:=req - o_neg;
+elsif (o_neg>req) and flag = 0 then
+dbms_output.put_line('true4');
+update stock set o_neg = o_neg - req;
+flag:=1;
+end if;
+end if;
+----------------------------------------------------------------------------AB Positive
+if bg = 'AB+' then
+if (ab_pos<req) then
+update stock set ab_pos = 0;
+req:=req-ab_pos;
+dbms_output.put_line('true13');
+elsif (ab_pos>req) then
+dbms_output.put_line('true14');
+update stock set ab_pos = ab_pos - req;
+flag:=1;
+end if;
+if (ab_neg<req) and flag = 0 then
+dbms_output.put_line('true15');
+update stock set ab_neg = 0;
+req:=req - ab_neg;
+elsif (ab_neg>req) and flag = 0 then
+dbms_output.put_line('true16');
+update stock set ab_neg = ab_neg - req;
+flag:=1;
+end if;
+if (o_neg<req) and flag = 0 then
+dbms_output.put_line('true3');
+update stock set o_neg = 0;
+req:=req - o_neg;
+elsif (o_neg>req) and flag = 0 then
+dbms_output.put_line('true4');
+update stock set o_neg = o_neg - req;
+flag:=1;
+end if;
+if (o_pos<req) and flag = 0 then
+dbms_output.put_line('true1');
+update stock set o_pos = 0;
+req:=req - o_pos;
+elsif (o_pos>req) and flag = 0 then
+dbms_output.put_line('true2');
+update stock set o_pos = o_pos - req;
+flag:=1;
+end if;
+if (a_neg<req) and flag = 0 then
+dbms_output.put_line('true7');
+update stock set a_neg = 0;
+req:=req - a_neg;
+elsif (a_neg>req) and flag = 0 then
+dbms_output.put_line('true8');
+update stock set a_neg = a_neg - req;
+flag:=1;
+end if;
+if (a_pos<req) and flag = 0 then
+dbms_output.put_line('true5');
+update stock set a_pos = 0;
+req:=req - a_pos;
+elsif (a_pos>req) and flag = 0 then
+dbms_output.put_line('true6');
+update stock set a_pos = a_pos - req;
+flag:=1;
+end if;
+if (b_neg<req) and flag = 0 then
+dbms_output.put_line('true11');
+update stock set b_neg = 0;
+req:=req - b_neg;
+elsif (b_neg>req) and flag = 0 then
+dbms_output.put_line('true12');
+update stock set b_neg = b_neg - req;
+flag:=1;
+end if;
+if (b_pos<req) and flag = 0 then
+dbms_output.put_line('true9');
+update stock set b_pos = 0;
+req:=req - b_pos;
+elsif (b_pos>req) and flag = 0 then
+dbms_output.put_line('true10');
+update stock set b_pos = b_pos - req;
+flag:=1;
+end if;
+end if;
+----------------------------------------------------------------------------AB Negative
+if bg = 'AB-' then
+if (ab_neg<req) then
+update stock set ab_neg = 0;
+req:=req-ab_neg;
+dbms_output.put_line('true15');
+elsif (ab_neg>req) then
+dbms_output.put_line('true16');
+update stock set ab_neg = ab_neg - req;
+flag:=1;
+end if;
+if (o_neg<req) and flag = 0 then
+dbms_output.put_line('true3');
+update stock set o_neg = 0;
+req:=req - o_neg;
+elsif (o_neg>req) and flag = 0 then
+dbms_output.put_line('true4');
+update stock set o_neg = o_neg - req;
+flag:=1;
+end if;
+if (a_neg<req) and flag = 0 then
+dbms_output.put_line('true7');
+update stock set a_neg = 0;
+req:=req - a_neg;
+elsif (a_neg>req) and flag = 0 then
+dbms_output.put_line('true8');
+update stock set a_neg = a_neg - req;
+flag:=1;
+end if;
+if (b_neg<req) and flag = 0 then
+dbms_output.put_line('true11');
+update stock set b_neg = 0;
+req:=req - b_neg;
+elsif (b_neg>req) and flag = 0 then
+dbms_output.put_line('true12');
+update stock set b_neg = b_neg - req;
+flag:=1;
+end if;
+end if;
+end;
+########################################################################################################
+create or replace trigger test_initial
+after update on patient
+for each row
+begin 
+dbms_output.put_line(:old.patient_id);
+testpack.initialize
+end;
+/
+
+
+
+
+create or replace trigger test_call
+after update on patient
+for each row
+begin 
+dbms_output.put_line(:old.patient_id);
+testpack.stock_update(:old.patient_id);
+end;
+/
